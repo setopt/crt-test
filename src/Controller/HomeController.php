@@ -60,7 +60,9 @@ class HomeController
     {
         try {
             $data = $this->twig->render('home/index.html.twig', [
-                'trailers' => $this->fetchData(),
+                'dateTime' => date('Y-m-d H:i:s'),
+                'controller' => (new \ReflectionClass($this))->getShortName(),
+                'function' => __FUNCTION__,
             ]);
         } catch (\Exception $e) {
             throw new HttpBadRequestException($request, $e->getMessage(), $e);

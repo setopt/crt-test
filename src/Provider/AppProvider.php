@@ -18,11 +18,13 @@ use Slim\{CallableResolver,
     Interfaces\CallableResolverInterface,
     Interfaces\RouteCollectorInterface,
     Interfaces\RouteResolverInterface,
+    Interfaces\RouteParserInterface,
     Middleware\ErrorMiddleware,
     Middleware\RoutingMiddleware,
     Psr7\Factory\ResponseFactory,
     Routing\RouteCollector,
-    Routing\RouteResolver};
+    Routing\RouteResolver,
+    Routing\RouteParser};
 use Twig\Environment;
 use UltraLite\Container\Container;
 
@@ -77,10 +79,20 @@ class AppProvider implements ServiceProviderInterface
         $container->set(RouteResolver::class, static function (ContainerInterface $container) {
             return new RouteResolver($container->get(RouteCollectorInterface::class));
         });
-
+        
+        //Route parser implementation
+        $container->set(RouteParser::class, static function (ContainerInterface $container) {
+            return new RouteParser($container->get(RouteCollectorInterface::class));
+        });
+        
         // Route resolver interface
         $container->set(RouteResolverInterface::class, static function (ContainerInterface $container) {
             return $container->get(RouteResolver::class);
+        });
+        
+        // Route parser interface
+        $container->set(RouteParserInterface::class, static function (ContainerInterface $container) {
+            return $container->get(RouteParser::class);
         });
 
         // Monolog
@@ -111,7 +123,7 @@ class AppProvider implements ServiceProviderInterface
 
         // Errors
         $container->set(LoggerErrorHandler::class, static function (ContainerInterface $container) {
-            return new LoggerErrorHandler($container->get(ResponseFactoryInterface::class), $container->get(LoggerInterface::class));
+            return new LoggerErrorHandler($container->get(ResponseFactoryInterface::class), $container->get(LoggerInterface::class), $container->get(CallableResolverInterface::class));
         });
 
         // Errors
@@ -137,7 +149,7 @@ class AppProvider implements ServiceProviderInterface
 
         // Middleware for routing
         $container->set(RoutingMiddleware::class, static function (ContainerInterface $container) {
-            return new RoutingMiddleware($container->get(RouteResolverInterface::class));
+            return new RoutingMiddleware($container->get(RouteResolverInterface::class),$container->get(RouteParserInterface::class));
         });
 
         $container->set(GuzzleAdapter::class, static function (ContainerInterface $container) {

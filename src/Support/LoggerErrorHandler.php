@@ -10,6 +10,7 @@ namespace App\Support;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Log\LoggerInterface;
 use Slim\Handlers\ErrorHandler;
+use Slim\Interfaces\CallableResolverInterface;
 
 class LoggerErrorHandler extends ErrorHandler
 {
@@ -24,9 +25,9 @@ class LoggerErrorHandler extends ErrorHandler
      * @param ResponseFactoryInterface $responseFactory
      * @param LoggerInterface          $logger
      */
-    public function __construct(ResponseFactoryInterface $responseFactory, LoggerInterface $logger)
+    public function __construct(ResponseFactoryInterface $responseFactory, LoggerInterface $logger, CallableResolverInterface $callableResolver)
     {
-        parent::__construct($responseFactory);
+        parent::__construct($callableResolver,$responseFactory);
         $this->logger = $logger;
     }
 
